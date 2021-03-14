@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import getDifferenceTwoFile from './src/get_diff_two_files.js';
+import getDifferenceTwoFile from './src/generate_diff_file.js';
 
 program
   .version('0.0.1')
