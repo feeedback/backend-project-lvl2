@@ -2,12 +2,11 @@ import { test, expect } from '@jest/globals';
 import { createFixturesFilePath } from '../src/utils.js';
 import getDiff from '../src/generate_diff_file.js';
 
-const thisPath = import.meta.url;
-const filepathJsonA = createFixturesFilePath(thisPath, 'json/file_deep1.json');
-const filepathJsonB = createFixturesFilePath(thisPath, 'json/file_deep2.json');
+const filepathJsonA = createFixturesFilePath('json/file_deep1.json');
+const filepathJsonB = createFixturesFilePath('json/file_deep2.json');
 
-const filepathYamlA = createFixturesFilePath(thisPath, 'yaml/file_deep1.yml');
-const filepathYamlB = createFixturesFilePath(thisPath, 'yaml/file_deep2.yml');
+const filepathYamlA = createFixturesFilePath('yaml/file_deep1.yml');
+const filepathYamlB = createFixturesFilePath('yaml/file_deep2.yml');
 
 const expectedStylish = `{
     common: {
