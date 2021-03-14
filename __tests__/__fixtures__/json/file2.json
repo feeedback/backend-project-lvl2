@@ -1,9 +1,0 @@
-{
-  "timeout": 20,
-  "verbose": true,
-  "host": "hexlet.io",
-  "follow": {
-    "k1": "v1",
-    "k2": "v2_2"
-  }
-}

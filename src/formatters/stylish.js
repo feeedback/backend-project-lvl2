@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 import _ from 'lodash';
 
 const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
@@ -8,15 +7,11 @@ const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
   const indent = ' '.repeat(indentCount + indentStep);
   const keysSorted = _.sortBy(Object.keys(obj));
 
-  const res = [];
-  res.push('{');
+  const body = keysSorted.map(
+    (key) => `${indent}${key}: ${stringifyValue(obj[key], indentCount + indentStep, indentStep)}`,
+  );
 
-  for (const key of keysSorted) {
-    res.push(`${indent}${key}: ${stringifyValue(obj[key], indentCount + indentStep, indentStep)}`);
-  }
-
-  res.push(`${' '.repeat(indentCount)}}`);
-  return res.join('\n');
+  return ['{', body.join('\n'), `${' '.repeat(indentCount)}}`].join('\n');
 };
 
 const getDifferenceByKeyValue = (objA, objB, indent = 0, indentStep = 4) => {
@@ -25,29 +20,24 @@ const getDifferenceByKeyValue = (objA, objB, indent = 0, indentStep = 4) => {
 
   const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
 
-  const diff = [];
-  diff.push('{');
-
-  for (const key of keysAllSorted) {
+  const diffBody = keysAllSorted.map((key) => {
     if (_.isPlainObject(objA[key]) && _.isPlainObject(objB[key])) {
-      diff.push(`${indent2}  ${key}: ${getDifferenceByKeyValue(objA[key], objB[key], nowIndent)}`);
-    } else if (_.has(objA, key)) {
+      return `${indent2}  ${key}: ${getDifferenceByKeyValue(objA[key], objB[key], nowIndent)}`;
+    }
+    if (_.has(objA, key)) {
       if (_.has(objB, key)) {
         if (objA[key] === objB[key]) {
-          diff.push(`${indent2}  ${key}: ${stringifyValue(objA[key], nowIndent)}`);
-        } else {
-          diff.push(`${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`);
-          diff.push(`${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`);
+          return `${indent2}  ${key}: ${stringifyValue(objA[key], nowIndent)}`;
         }
-      } else {
-        diff.push(`${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`);
+        return `${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}
+${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`;
       }
-    } else {
-      diff.push(`${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`);
+      return `${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`;
     }
-  }
+    return `${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`;
+  });
 
-  diff.push(`${' '.repeat(indent)}}`);
+  const diff = ['{', diffBody.join('\n'), `${' '.repeat(indent)}}`];
   return diff.join('\n');
 };
 
