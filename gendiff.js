@@ -12,6 +12,6 @@ program
     console.log(getDifferenceTwoFile(pathToFile1, pathToFile2, format));
   });
 
-program.parse();
+program.parse(process.argv);
 
 export default getDifferenceTwoFile;

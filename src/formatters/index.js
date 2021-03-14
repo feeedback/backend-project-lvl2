@@ -7,5 +7,8 @@ const mapFormatNameToFn = {
   stylish: getDifferenceStylish,
   json: getDifferenceToJson,
 };
+const nonExistFormat = () => {
+  console.log('Wrong option --format');
+};
 
-export default (formatName) => mapFormatNameToFn[formatName];
+export default (formatName) => mapFormatNameToFn[formatName] ?? nonExistFormat;
