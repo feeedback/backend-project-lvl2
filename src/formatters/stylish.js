@@ -1,20 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import _ from 'lodash';
 
-// const stringifyObj = (obj) => {
-//   const res = [];
-//   for (const key in obj) {
-//     if (_.has(obj, key)) {
-//       if (_.isPlainObject(obj[key])) {
-//         res.push([key, stringifyObj(obj[key])]);
-//       } else {
-//         res.push([key, obj[key]]);
-//       }
-//     }
-//   }
-//   return res;
-// };
-
 const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
   if (!_.isPlainObject(obj)) {
     return obj;

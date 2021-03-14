@@ -1,67 +1,39 @@
 /* eslint-disable no-restricted-syntax */
 import _ from 'lodash';
 
-// const stringifyObj = (obj) => {
-//   const res = [];
-//   for (const key in obj) {
-//     if (_.has(obj, key)) {
-//       if (_.isPlainObject(obj[key])) {
-//         res.push([key, stringifyObj(obj[key])]);
-//       } else {
-//         res.push([key, obj[key]]);
-//       }
-//     }
-//   }
-//   return res;
-// };
-
-const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
-  if (!_.isPlainObject(obj)) {
-    return obj;
+const getValueStr = (value) => {
+  if (_.isObject(value)) {
+    return '[complex value]';
   }
-  const indent = ' '.repeat(indentCount + indentStep);
-  const keysSorted = _.sortBy(Object.keys(obj));
-
-  const res = [];
-  res.push('{');
-
-  for (const key of keysSorted) {
-    res.push(`${indent}${key}: ${stringifyValue(obj[key], indentCount + indentStep, indentStep)}`);
-  }
-
-  res.push(`${' '.repeat(indentCount)}}`);
-  return res.join('\n');
+  return typeof value === 'string' ? `'${value}'` : value;
 };
 
-const getDifferenceByKeyValue = (objA, objB, indent = 0, indentStep = 4) => {
-  const nowIndent = indent + indentStep;
-  const indent2 = ' '.repeat(indent + 2);
-
+const getDifferenceByKeyValue = (objA, objB, keys = []) => {
   const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
-
   const diff = [];
-  diff.push('{');
 
   for (const key of keysAllSorted) {
+    const keysPath = [...keys, key].join('.');
+
     if (_.isPlainObject(objA[key]) && _.isPlainObject(objB[key])) {
-      diff.push(`${indent2}  ${key}: ${getDifferenceByKeyValue(objA[key], objB[key], nowIndent)}`);
+      diff.push(getDifferenceByKeyValue(objA[key], objB[key], [...keys, key]));
     } else if (_.has(objA, key)) {
       if (_.has(objB, key)) {
         if (objA[key] === objB[key]) {
-          diff.push(`${indent2}  ${key}: ${stringifyValue(objA[key], nowIndent)}`);
+          // nothing
         } else {
-          diff.push(`${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`);
-          diff.push(`${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`);
+          diff.push(
+            `Property '${keysPath}' was updated. From ${getValueStr(objA[key])} to ${getValueStr(objB[key])}`,
+          );
         }
       } else {
-        diff.push(`${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`);
+        diff.push(`Property '${keysPath}' was removed`);
       }
     } else {
-      diff.push(`${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`);
+      diff.push(`Property '${keysPath}' was added with value: ${getValueStr(objB[key])}`);
     }
   }
 
-  diff.push(`${' '.repeat(indent)}}`);
   return diff.join('\n');
 };
 
