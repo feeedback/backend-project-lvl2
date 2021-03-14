@@ -1,35 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import _ from 'lodash';
+// import _ from 'lodash';
 import getParsedData from './parsers.js';
-
-const getDifferenceByKeyValue = (objA, objB) => {
-  const keysA = _.sortBy(Object.keys(objA));
-  const keysB = _.sortBy(Object.keys(objB));
-
-  const keysAll = _.uniq([...keysA, ...keysB]);
-
-  const diff = ['{'];
-  // eslint-disable-next-line no-restricted-syntax
-  for (const key of keysAll) {
-    if (_.has(objA, key)) {
-      if (_.has(objB, key)) {
-        if (objA[key] === objB[key]) {
-          diff.push(`  ${key}: ${objA[key]}`);
-        } else {
-          diff.push(`- ${key}: ${objA[key]}`);
-          diff.push(`+ ${key}: ${objB[key]}`);
-        }
-      } else {
-        diff.push(`- ${key}: ${objA[key]}`);
-      }
-    } else {
-      diff.push(`+ ${key}: ${objB[key]}`);
-    }
-  }
-
-  return diff.join('\n  ').concat('\n}');
-};
+import getDifferenceByKeyValue from './stylish.js';
 
 const getDifferenceTwoFile = (pathToFile1, pathToFile2) => {
   const file1 = fs.readFileSync(path.resolve(process.cwd(), pathToFile1));
