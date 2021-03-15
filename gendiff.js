@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+import commander from 'commander';
 import getDifferenceTwoFile from './src/generate_diff_file.js';
 
-const program = new Command();
+const program = new commander.Command();
 program
   .version('1.0.1')
   .description('Compares two configuration files and shows a difference.')
