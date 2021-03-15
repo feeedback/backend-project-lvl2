@@ -65,7 +65,7 @@ Property 'group1.nest' was updated. From [complex value] to 'str'
 Property 'group2' was removed
 Property 'group3' was added with value: [complex value]`;
 
-const expectedJSON = [
+const expectedJSON = JSON.stringify([
   {
     key: 'common',
     children: [
@@ -106,7 +106,7 @@ const expectedJSON = [
     type: 'added',
     value: { deep: { id: { number: 45 } }, fee: 100500 },
   },
-];
+]);
 
 test('deep diff JSON files. format "stylish" (default)', () => {
   expect(getDiff(filepathJsonA, filepathJsonB)).toBe(expectedStylish);

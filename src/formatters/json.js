@@ -19,6 +19,6 @@ const getDifferenceByKeyValue = (objA, objB) => {
     return { key, type: 'added', value: objB[key] };
   });
 
-  return diff;
+  return JSON.stringify(diff);
 };
 export default getDifferenceByKeyValue;
