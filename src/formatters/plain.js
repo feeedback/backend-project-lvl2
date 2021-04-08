@@ -20,14 +20,10 @@ const getDifferenceByKeyValue = (diffAST, keysAcc = []) => Object.values(diffAST
     const keysPathStr = keysPath.join('.');
 
     const mapTypeDiffToStr = {
-      no_changed: () => [],
-      added: () => [`Property '${keysPathStr}' was added with value: ${getValueStr(value)}`],
-      updated: () => {
-        const [old, now] = value;
-        return [`Property '${keysPathStr}' was updated. From ${getValueStr(old)} to ${getValueStr(now)}`];
-      },
-      removed: () => [`Property '${keysPathStr}' was removed`],
-
+      no_changed: [],
+      added: [`Property '${keysPathStr}' was added with value: ${getValueStr(value)}`],
+      updated: [`Property '${keysPathStr}' was updated. From ${getValueStr(value[0])} to ${getValueStr(value[1])}`],
+      removed: [`Property '${keysPathStr}' was removed`],
     };
 
     return [...acc, ...mapTypeDiffToStr[type]];

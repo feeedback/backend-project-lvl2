@@ -28,19 +28,15 @@ const getDifferenceByKeyValue = (diffAST, indent = 0, indentStep = 4) => {
       }
 
       const mapTypeDiffToStr = {
-        no_changed: () => [],
-        added: () => [`${indent2}  ${key}: ${stringify(value, nowIndent)}`],
-        updated: () => {
-          const [old, now] = value;
-          return [
-            [
-              `${indent2}- ${key}: ${stringify(old, nowIndent)}`,
-              `${indent2}+ ${key}: ${stringify(now, nowIndent)}`,
-            ].join('\n'),
-          ];
-        },
-        removed: () => [`${indent2}- ${key}: ${stringify(value, nowIndent)}`],
-
+        no_changed: [`${indent2}  ${key}: ${stringify(value, nowIndent)}`],
+        added: [`${indent2}+ ${key}: ${stringify(value, nowIndent)}`],
+        updated: [
+          [
+            `${indent2}- ${key}: ${stringify(value[0], nowIndent)}`,
+            `${indent2}+ ${key}: ${stringify(value[1], nowIndent)}`,
+          ].join('\n'),
+        ],
+        removed: [`${indent2}- ${key}: ${stringify(value, nowIndent)}`],
       };
 
       return [...acc, ...mapTypeDiffToStr[type]];
