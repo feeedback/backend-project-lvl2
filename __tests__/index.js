@@ -1,6 +1,6 @@
 import { test, expect } from '@jest/globals';
 import { createFixturesFilePath } from '../src/utils.js';
-import getDiff from '../src/generate_diff_file.js';
+import getDiff from '../src/index.js';
 
 const filepathJsonA = createFixturesFilePath('json/file_deep1.json');
 const filepathJsonB = createFixturesFilePath('json/file_deep2.json');

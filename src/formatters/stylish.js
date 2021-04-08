@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import createDiffTree from '../create_diff.js';
 
 const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
   if (!_.isPlainObject(obj)) {
@@ -14,31 +15,45 @@ const stringifyValue = (obj, indentCount = 0, indentStep = 4) => {
   return ['{', body.join('\n'), `${' '.repeat(indentCount)}}`].join('\n');
 };
 
-const getDifferenceByKeyValue = (objA, objB, indent = 0, indentStep = 4) => {
+const getDifferenceByKeyValue = (diffAST, indent = 0, indentStep = 4) => {
   const nowIndent = indent + indentStep;
   const indent2 = ' '.repeat(indent + 2);
 
-  const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
-
-  const diffBody = keysAllSorted.map((key) => {
-    if (_.isPlainObject(objA[key]) && _.isPlainObject(objB[key])) {
-      return `${indent2}  ${key}: ${getDifferenceByKeyValue(objA[key], objB[key], nowIndent)}`;
-    }
-    if (_.has(objA, key)) {
-      if (_.has(objB, key)) {
-        if (objA[key] === objB[key]) {
-          return `${indent2}  ${key}: ${stringifyValue(objA[key], nowIndent)}`;
-        }
-        return `${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}
-${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`;
+  const diffBody = Object.values(diffAST)
+    .reduce((acc, {
+      key, children, type, value,
+    }) => {
+      let str = '';
+      if (children) {
+        str += `${indent2}  ${key}: ${getDifferenceByKeyValue(children, nowIndent)}`;
       }
-      return `${indent2}- ${key}: ${stringifyValue(objA[key], nowIndent)}`;
-    }
-    return `${indent2}+ ${key}: ${stringifyValue(objB[key], nowIndent)}`;
-  });
+
+      if (type === 'no_changed') {
+        str += `${indent2}  ${key}: ${stringifyValue(value, nowIndent)}`;
+      }
+
+      if (type === 'added') {
+        str += `${indent2}+ ${key}: ${stringifyValue(value, nowIndent)}`;
+      }
+      if (type === 'updated') {
+        const [old, now] = value;
+        str += `${indent2}- ${key}: ${stringifyValue(old, nowIndent)}`;
+        str += '\n';
+        str += `${indent2}+ ${key}: ${stringifyValue(now, nowIndent)}`;
+      }
+      if (type === 'removed') {
+        str += `${indent2}- ${key}: ${stringifyValue(value, nowIndent)}`;
+      }
+
+      return [...acc, str];
+    }, []);
 
   const diff = ['{', diffBody.join('\n'), `${' '.repeat(indent)}}`];
   return diff.join('\n');
 };
 
-export default getDifferenceByKeyValue;
+export default (objA, objB) => {
+  const diffAST = createDiffTree(objA, objB);
+
+  return getDifferenceByKeyValue(diffAST);
+};

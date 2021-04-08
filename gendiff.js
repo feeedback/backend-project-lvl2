@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import commander from 'commander';
-import getDifferenceTwoFile from './src/generate_diff_file.js';
+import getDifferenceTwoFile from './src/index.js';
 
 const program = new commander.Command();
 program

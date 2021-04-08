@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import createDiffTree from '../create_diff.js';
 
 const getValueStr = (value) => {
   if (_.isObject(value)) {
@@ -7,30 +8,38 @@ const getValueStr = (value) => {
   return typeof value === 'string' ? `'${value}'` : value;
 };
 
-const getDifferenceByKeyValue = (objA, objB, keys = []) => {
-  const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
-
-  const diff = keysAllSorted.map((key) => {
-    const keysPath = [...keys, key].join('.');
-
-    if (_.isPlainObject(objA[key]) && _.isPlainObject(objB[key])) {
-      return getDifferenceByKeyValue(objA[key], objB[key], [...keys, key]);
+const getDifferenceByKeyValue = (diffAST, keysAcc = []) => Object.values(diffAST).reduce(
+  (acc, {
+    key, children, type, value,
+  }) => {
+    const keysPath = [...keysAcc, key];
+    if (children) {
+      return [...acc, ...getDifferenceByKeyValue(children, keysPath)];
     }
-    if (_.has(objA, key)) {
-      if (_.has(objB, key)) {
-        if (objA[key] === objB[key]) {
-          return null; // nothing
-        }
-        return `Property '${keysPath}' was updated. From ${getValueStr(objA[key])} to ${getValueStr(
-          objB[key],
-        )}`;
-      }
-      return `Property '${keysPath}' was removed`;
-    }
-    return `Property '${keysPath}' was added with value: ${getValueStr(objB[key])}`;
-  });
 
-  return diff.filter(Boolean).join('\n');
+    if (type === 'no_changed') {
+      return acc; // nothing
+    }
+    const keysPathStr = keysPath.join('.');
+
+    let str = '';
+    if (type === 'added') {
+      str = `Property '${keysPathStr}' was added with value: ${getValueStr(value)}`;
+    }
+    if (type === 'updated') {
+      const [old, now] = value;
+      str = `Property '${keysPathStr}' was updated. From ${getValueStr(old)} to ${getValueStr(now)}`;
+    }
+    if (type === 'removed') {
+      str = `Property '${keysPathStr}' was removed`;
+    }
+
+    return [...acc, str];
+  }, [],
+);
+
+export default (objA, objB) => {
+  const diffAST = createDiffTree(objA, objB);
+
+  return getDifferenceByKeyValue(diffAST).join('\n');
 };
-
-export default getDifferenceByKeyValue;
