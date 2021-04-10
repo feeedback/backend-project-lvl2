@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
-const getUniqKeysObjects = (...objects) => _.sortBy(_.uniq(
+const getUniqKeysObjects = (objects) => _.sortBy(_.uniq(
   objects.flatMap((obj) => Object.keys(obj)),
 ));
 
-const getDifferenceByKeyValue = (objA, objB) => getUniqKeysObjects(objA, objB).map((key) => {
+const getDifferenceByKeyValue = (objA, objB) => getUniqKeysObjects([objA, objB]).map((key) => {
   const oldValue = objA[key];
   const newValue = objB[key];
 
