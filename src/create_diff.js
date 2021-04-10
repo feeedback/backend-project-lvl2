@@ -1,43 +1,28 @@
 import _ from 'lodash';
 
-const getDifferenceByKeyValue = (objA, objB) => {
-  const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
+const getUniqKeysObjects = (...objects) => _.sortBy(_.uniq(
+  objects.flatMap((obj) => Object.keys(obj)),
+));
 
-  const diff = keysAllSorted.map((key) => {
-    const oldValue = objA[key];
-    const newValue = objB[key];
-    const node = { key };
+const getDifferenceByKeyValue = (objA, objB) => getUniqKeysObjects(objA, objB).map((key) => {
+  const oldValue = objA[key];
+  const newValue = objB[key];
 
-    if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
-      node.children = getDifferenceByKeyValue(oldValue, newValue);
+  if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
+    return { key, children: getDifferenceByKeyValue(oldValue, newValue) };
+  }
 
-      return node;
+  if (oldValue === newValue) {
+    return { key, type: 'no_changed', value: oldValue };
+  }
+
+  if (_.has(objA, key)) {
+    if (_.has(objB, key)) {
+      return { key, type: 'updated', value: [oldValue, newValue] };
     }
-
-    if (oldValue === newValue) {
-      node.type = 'no_changed';
-      node.value = oldValue;
-
-      return node;
-    }
-
-    if (_.has(objA, key)) {
-      if (_.has(objB, key)) {
-        node.type = 'updated';
-        node.value = [oldValue, newValue];
-      } else {
-        node.type = 'removed';
-        node.value = oldValue;
-      }
-    } else {
-      node.type = 'added';
-      node.value = newValue;
-    }
-
-    return node;
-  });
-
-  return diff;
-};
+    return { key, type: 'removed', value: oldValue };
+  }
+  return { key, type: 'added', value: newValue };
+});
 
 export default (objA, objB) => getDifferenceByKeyValue(objA, objB);
