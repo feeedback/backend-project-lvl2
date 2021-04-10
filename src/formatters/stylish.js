@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import createDiffTree from '../create_diff.js';
 
 const stringify = (obj, indentCount = 0, indentStep = 4) => {
   if (!_.isPlainObject(obj)) {
@@ -15,7 +14,7 @@ const stringify = (obj, indentCount = 0, indentStep = 4) => {
   return ['{', body.join('\n'), `${' '.repeat(indentCount)}}`].join('\n');
 };
 
-const getDifferenceByKeyValue = (diffAST, indent = 0, indentStep = 4) => {
+const createDiffFormatted = (diffAST, indent = 0, indentStep = 4) => {
   const nowIndent = indent + indentStep;
   const indent2 = ' '.repeat(indent + 2);
 
@@ -24,7 +23,7 @@ const getDifferenceByKeyValue = (diffAST, indent = 0, indentStep = 4) => {
       key, children, type, value,
     }) => {
       if (children) {
-        return [...acc, `${indent2}  ${key}: ${getDifferenceByKeyValue(children, nowIndent)}`];
+        return [...acc, `${indent2}  ${key}: ${createDiffFormatted(children, nowIndent)}`];
       }
 
       const mapTypeDiffToStr = {
@@ -46,8 +45,4 @@ const getDifferenceByKeyValue = (diffAST, indent = 0, indentStep = 4) => {
   return diff.join('\n');
 };
 
-export default (objA, objB) => {
-  const diffAST = createDiffTree(objA, objB);
-
-  return getDifferenceByKeyValue(diffAST);
-};
+export default (diffAST) => createDiffFormatted(diffAST);

@@ -4,19 +4,37 @@ const getDifferenceByKeyValue = (objA, objB) => {
   const keysAllSorted = _.sortBy(_.uniq([...Object.keys(objA), ...Object.keys(objB)]));
 
   const diff = keysAllSorted.map((key) => {
-    if (_.isPlainObject(objA[key]) && _.isPlainObject(objB[key])) {
-      return { key, children: getDifferenceByKeyValue(objA[key], objB[key]) };
+    const oldValue = objA[key];
+    const newValue = objB[key];
+    const node = { key };
+
+    if (_.isPlainObject(oldValue) && _.isPlainObject(newValue)) {
+      node.children = getDifferenceByKeyValue(oldValue, newValue);
+
+      return node;
     }
+
+    if (oldValue === newValue) {
+      node.type = 'no_changed';
+      node.value = oldValue;
+
+      return node;
+    }
+
     if (_.has(objA, key)) {
       if (_.has(objB, key)) {
-        if (objA[key] === objB[key]) {
-          return { key, type: 'no_changed', value: objA[key] };
-        }
-        return { key, type: 'updated', value: [objA[key], objB[key]] };
+        node.type = 'updated';
+        node.value = [oldValue, newValue];
+      } else {
+        node.type = 'removed';
+        node.value = oldValue;
       }
-      return { key, type: 'removed', value: objA[key] };
+    } else {
+      node.type = 'added';
+      node.value = newValue;
     }
-    return { key, type: 'added', value: objB[key] };
+
+    return node;
   });
 
   return diff;

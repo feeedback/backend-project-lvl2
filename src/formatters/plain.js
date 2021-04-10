@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import createDiffTree from '../create_diff.js';
 
 const getValueStr = (value) => {
   if (_.isObject(value)) {
@@ -8,13 +7,13 @@ const getValueStr = (value) => {
   return typeof value === 'string' ? `'${value}'` : value;
 };
 
-const getDifferenceByKeyValue = (diffAST, keysAcc = []) => Object.values(diffAST).reduce(
+const createDiffFormatted = (diffAST, keysAcc = []) => Object.values(diffAST).reduce(
   (acc, {
     key, children, type, value,
   }) => {
     const keysPath = [...keysAcc, key];
     if (children) {
-      return [...acc, ...getDifferenceByKeyValue(children, keysPath)];
+      return [...acc, ...createDiffFormatted(children, keysPath)];
     }
 
     const keysPathStr = keysPath.join('.');
@@ -30,8 +29,4 @@ const getDifferenceByKeyValue = (diffAST, keysAcc = []) => Object.values(diffAST
   }, [],
 );
 
-export default (objA, objB) => {
-  const diffAST = createDiffTree(objA, objB);
-
-  return getDifferenceByKeyValue(diffAST).join('\n');
-};
+export default (diffAST) => createDiffFormatted(diffAST).join('\n');

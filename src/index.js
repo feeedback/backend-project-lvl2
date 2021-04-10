@@ -1,16 +1,23 @@
 import fs from 'fs';
 import path from 'path';
 import getParsedData from './parsers.js';
+import createDiffTree from './create_diff.js';
 import getFormatterDiff from './formatters/index.js';
 
+const readFileAndParse = (pathToFile) => {
+  const file = fs.readFileSync(path.resolve(process.cwd(), pathToFile));
+  const fileExt = path.extname(pathToFile).slice(1);
+  const fileData = getParsedData(fileExt, file);
+
+  return fileData;
+};
+
 const getDifferenceTwoFile = (pathToFile1, pathToFile2, format = 'stylish') => {
-  const file1 = fs.readFileSync(path.resolve(process.cwd(), pathToFile1));
-  const file2 = fs.readFileSync(path.resolve(process.cwd(), pathToFile2));
+  const diffAST = createDiffTree(readFileAndParse(pathToFile1), readFileAndParse(pathToFile2));
 
-  const file1Data = getParsedData(path.extname(pathToFile1).slice(1), file1);
-  const file2Data = getParsedData(path.extname(pathToFile2).slice(1), file2);
+  const formatterFn = getFormatterDiff(format);
 
-  return getFormatterDiff(format)(file1Data, file2Data);
+  return formatterFn(diffAST);
 };
 
 export default getDifferenceTwoFile;
